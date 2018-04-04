@@ -103,7 +103,8 @@ THREADS=${_arg_threads}
 
 BASE_DIR=$(pwd)
 #########################################   PATHS: CHECK THESE BEFORE RUNNING   #########################################
-CONCOCT
+#CONCOCT="/mnt/scratch/JACOBS_SOFTWARE/CONCOCT-0.4.0"
+
 echo "value of BASE_DIR : $BASE_DIR"
 mkdir $BASE_DIR/Metaxas_Output
 
@@ -139,6 +140,13 @@ do
   cp $filename-contigs.fa $BASE_DIR/Metaxas_Output/$filename/bowtie
   cd $BASE_DIR/Metaxas_Output/$filename/bowtie
 
+	#Fix fasta names for later use with Anvio
+	anvi-script-reformat-fasta $filename-contigs.fa -o $filename-contigs-fixed.fa
+	#Get rid of the one with dumb naming conventions
+	rm $filename-contigs.fa
+	#Standardize file name 
+	mv $filename-contigs-fixed.fa $filename-contigs.fa
+
   #Build bowtie index
   bowtie-build $filename-contigs.fa $filename-idx --threads $THREADS
 
@@ -151,8 +159,22 @@ do
   #Sort and do anvio things
   anvi-init-bam $filename-alignment-RAW.bam -o $filename-alignment.bam
   rm $filename-alignment-RAW.bam
+	#Remove bowtie index files
+	rm *.bt2
 
   #Bin!!!!!!! Bin!!!!!!! Bin!!!!!!
+
+	#Go back to file directory
+	cd $BASE_DIR/Metaxas_Output/$filename
+	cp $BASE_DIR/Metaxas_Output/$filename/bowtie/$filename-contigs.fa $BASE_DIR/Metaxas_Output/$filename/
+
+	#######		METABAT		#######
+
+	gzip $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa
+	mkdir $BASE_DIR/Metaxas_Output/$filename/metabat
+	metabat -i $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa.gz -o $BASE_DIR/Metaxas_Output/$filename/metabat/$filename-metabat -t $THREADS
+
+	#######		MyCC		#######
 
   #MyCC- Tetramer
   MyCC.py $filename-contigs.fa 4mer -a $filename-alignment.bam -t 1000
@@ -161,6 +183,10 @@ do
   #MyCC- 5/6-mer
   MyCC.py $filename-contigs.fa 56mer -a $filename-alignment.bam -t 1000
   mv*56mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_56mer
+
+	#######		MaxBin		#######
+	mkdir $BASE_DIR/Metaxas_Output/$filename/MaxBin
+	run_MaxBin.pl -contig $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa -reads $filename_wpath -out $BASE_DIR/Metaxas_Output/$filename/MaxBin/$filename-MaxBin
 
   cd $BASE_DIR
 done
