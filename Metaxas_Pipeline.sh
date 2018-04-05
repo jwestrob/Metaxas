@@ -133,7 +133,7 @@ do
 
   #cd to idba directory; begin assembly
   cd $BASE_DIR/Metaxas_Output/$filename/idba
-  idba_ud --mink 40 --maxk 100 --step 20 --min_contig 500 -l $filename_wpath --num_threads $THREADS
+  idba_ud --mink 40 --maxk 100 --step 20 --min_contig 500 -r $filename_wpath --num_threads $THREADS
   mv out/contig.fa out$filename-contigs.fa
 
   #Move to bowtie directory
