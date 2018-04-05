@@ -183,7 +183,7 @@ do
 	#######		MyCC		#######
 
   #MyCC- Tetramer
-  MyCC.py $filename-contigs.fa 4mer -a $filename-alignment.bam -t 1000
+  MyCC.py $filename-contigs.fa 4mer -a bowtie2/$filename-alignment.bam -t 1000
   mv *4mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_4mer
 
   #MyCC- 5/6-mer
