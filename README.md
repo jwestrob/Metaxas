@@ -3,3 +3,7 @@
 # Dependencies:
 
 IDBA_UD, Bowtie2, Samtools, Anvio4, MetaBat, MaxBin, CONCOCT, Abawaca?, MyCC
+
+# TODO:
+
+## Get ESOM running!!!!! 
