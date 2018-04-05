@@ -174,7 +174,9 @@ do
 
 	#######		METABAT		#######
 
-	gzip $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa
+	cp $filename-contigs.fa backup.fa
+	gzip $filename-contigs.fa
+	mv backup.fa $filename-contigs.fa
 	mkdir $BASE_DIR/Metaxas_Output/$filename/metabat
 	metabat -i $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa.gz -o $BASE_DIR/Metaxas_Output/$filename/metabat/$filename-metabat -t $THREADS
 
