@@ -188,7 +188,7 @@ do
 
   #MyCC- 5/6-mer
   MyCC.py $filename-contigs.fa 56mer -a $filename-alignment.bam -t 1000
-  mv*56mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_56mer
+  mv *56mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_56mer
 
 	#######		MaxBin		#######
 	mkdir $BASE_DIR/Metaxas_Output/$filename/MaxBin
