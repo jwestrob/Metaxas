@@ -134,7 +134,7 @@ do
   #cd to idba directory; begin assembly
   cd $BASE_DIR/Metaxas_Output/$filename/idba
 	#Reduce number of iterations for debugging purposes only; REVERT ONCE DONE
-  idba_ud --mink 40 --maxk 60 --step 20 --min_contig 500 -l $filename_wpath --num_threads $THREADS
+  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 15 --min_contig 500 -l $filename_wpath --num_threads $THREADS
 	mv out/contig.fa .
 	mv contig.fa $filename-contigs.fa
 
