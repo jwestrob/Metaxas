@@ -134,7 +134,7 @@ do
   #cd to idba directory; begin assembly
   cd $BASE_DIR/Metaxas_Output/$filename/idba
 	#Reduce number of iterations for debugging purposes only; REVERT ONCE DONE
-  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 15 --min_contig 500 -l $filename_wpath --num_threads $THREADS
+  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 15 --min_contig 500 -r $filename_wpath --num_threads $THREADS
 	mv out/contig.fa .
 	mv contig.fa $filename-contigs.fa
 
@@ -152,10 +152,10 @@ do
   cd $BASE_DIR/Metaxas_Output/$filename/bowtie
 
   #Build bowtie index
-  bowtie-build $filename-contigs.fa $filename-idx --threads $THREADS
+  bowtie2-build $filename-contigs.fa $filename-idx --threads $THREADS
 
   #Align reads to contigs
-  bowtie2 -x $filename-idx -r $filename_wpath --threads $THREADS -S $filename-sam.sam
+  bowtie2 -x $filename-idx -r $filename_wpath --threads $THREADS -S $filename-sam.sam --al $filename-aligned-reads.fa --un $filename-unaligned-reads.fa
 
   #Convert to bam
   samtools view -F 4 -@ $THREADS -bS $filename-sam.sam > $filename-alignment-RAW.bam
@@ -183,11 +183,11 @@ do
 	#######		MyCC		#######
 
   #MyCC- Tetramer
-  MyCC.py $filename-contigs.fa 4mer -a bowtie2/$filename-alignment.bam -t 1000
+  MyCC.py $filename-contigs.fa 4mer -a bowtie/$filename-alignment.bam -t 1000
   mv *4mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_4mer
 
   #MyCC- 5/6-mer
-  MyCC.py $filename-contigs.fa 56mer -a $filename-alignment.bam -t 1000
+  MyCC.py $filename-contigs.fa 56mer -a bowtie/$filename-alignment.bam -t 1000
   mv *56mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_56mer
 
 	#######		MaxBin		#######
