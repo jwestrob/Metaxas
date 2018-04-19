@@ -164,36 +164,61 @@ do
   anvi-init-bam $filename-alignment-RAW.bam -o $filename-alignment.bam
   rm $filename-alignment-RAW.bam
 	#Remove bowtie index files
-	rm *.bt2
+  rm *.bt2
 
   #Bin!!!!!!! Bin!!!!!!! Bin!!!!!!
 
-	#Go back to file directory
-	cd $BASE_DIR/Metaxas_Output/$filename
-	cp $BASE_DIR/Metaxas_Output/$filename/bowtie/$filename-contigs.fa $BASE_DIR/Metaxas_Output/$filename/
+  #Go back to file directory
+  cd $BASE_DIR/Metaxas_Output/$filename
+  cp $BASE_DIR/Metaxas_Output/$filename/bowtie/$filename-contigs.fa $BASE_DIR/Metaxas_Output/$filename/
 
-	#######		METABAT		#######
+  #######		METABAT		#######
 
-	cp $filename-contigs.fa backup.fa
-	gzip $filename-contigs.fa
-	mv backup.fa $filename-contigs.fa
-	mkdir $BASE_DIR/Metaxas_Output/$filename/metabat
-	metabat -i $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa.gz -o $BASE_DIR/Metaxas_Output/$filename/metabat/$filename-metabat -t $THREADS
+  cp $filename-contigs.fa backup.fa
+  gzip $filename-contigs.fa
+  mv backup.fa $filename-contigs.fa
+  mkdir $BASE_DIR/Metaxas_Output/$filename/metabat
+  metabat -i $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa.gz -o $BASE_DIR/Metaxas_Output/$filename/metabat/$filename-metabat -t $THREADS
 
-	#######		MyCC		#######
+  #######		MyCC		#######
 
-  #MyCC- Tetramer
+  ####### 		MyCC- Tetramer
   MyCC.py $filename-contigs.fa 4mer -a bowtie/$filename-alignment.bam -t 1000
   mv *4mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_4mer
 
-  #MyCC- 5/6-mer
+  ####### Make special directory for fastas
+  mkdir MyCC_4mer/Bins
+  cp MyCC_4mer/6_ClusterCtg/*.fa MyCC_4mer/Bins
+
+  ####### 		MyCC- 5/6-mer
   MyCC.py $filename-contigs.fa 56mer -a bowtie/$filename-alignment.bam -t 1000
   mv *56mer* $BASE_DIR/Metaxas_Output/$filename/MyCC_56mer
 
-	#######		MaxBin		#######
-	mkdir $BASE_DIR/Metaxas_Output/$filename/MaxBin
-	run_MaxBin.pl -contig $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa -reads $filename_wpath -out $BASE_DIR/Metaxas_Output/$filename/MaxBin/$filename-MaxBin
+  ####### Make special directory for fastas
+  mkdir MyCC_56mer/Bins
+  cp MyCC_56mer/6_ClusterCtg/*.fa MyCC_56mer/Bins
 
+  #######		MaxBin		#######
+  mkdir $BASE_DIR/Metaxas_Output/$filename/MaxBin
+  run_MaxBin.pl -contig $BASE_DIR/Metaxas_Output/$filename/$filename-contigs.fa -reads $filename_wpath -out $BASE_DIR/Metaxas_Output/$filename/MaxBin/$filename-MaxBin
+
+  ####### Move non-FASTA files to subdirectory because DASTool doesn't like them
+  mkdir MaxBin/nonfasta
+  mv MaxBin/* MaxBin/nonfasta
+  mv MaxBin/nonfasta/*.fasta MaxBin/
+  
+  #######		DAS-Tool	#######
+  SCAF="/mnt/scratch/JACOBS_SOFTWARE/scaffolds2bin.py"
+  python $SCAF -bd metabat -o metabat
+  python $SCAF -bd MyCC_4mer/Bins -o MyCC_4mer
+  python $SCAF -bd MyCC_56mer/Bins -o MyCC_56mer
+  python $SCAF -bd MaxBin/ -o MaxBin
+
+  mkdir DAS
+  /mnt/scratch/JACOBS_SOFTWARE/DAS_Tool/DAS_Tool -i metabat.scaffolds2bin.tsv,MyCC_4mer.scaffolds2bin.tsv,MyCC_56mer.scaffolds2bin.tsv,MaxBin.scaffolds2bin.tsv \
+							-c $filename-contigs.fa -l metabat,MyCC_4mer,MyCC_56mer,MaxBin -t $THREADS -o DAS/DasToolRun1 --proteins DAS/Run1_proteins.faa
+
+  
   cd $BASE_DIR
 done
 
