@@ -133,19 +133,19 @@ do
 
   #cd to idba directory; begin assembly
   cd $BASE_DIR/Metaxas_Output/$filename/idba
-	#Reduce number of iterations for debugging purposes only; REVERT ONCE DONE
-  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 15 --min_contig 500 -r $filename_wpath --num_threads $THREADS
-	mv out/contig.fa .
-	mv contig.fa $filename-contigs.fa
+  #Reduce number of iterations for debugging purposes only; REVERT ONCE DONE
+  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 30 --min_contig 500 -r $filename_wpath --num_threads $THREADS
+  mv out/contig.fa .
+  mv contig.fa $filename-contigs.fa
 
-	#Fix fasta names for later use with Anvio
-	anvi-script-reformat-fasta $filename-contigs.fa -o $filename-contigs-fixed.fa
-	#Get rid of the one with dumb naming conventions
-	rm $filename-contigs.fa
-	#Standardize file name
-	mv $filename-contigs-fixed.fa $filename-contigs.fa
+  #Fix fasta names for later use with Anvio
+  anvi-script-reformat-fasta $filename-contigs.fa -o $filename-contigs-fixed.fa
+  #Get rid of the one with dumb naming conventions
+  rm $filename-contigs.fa
+  #Standardize file name
+  mv $filename-contigs-fixed.fa $filename-contigs.fa
 
-	cp $filename-contigs.fa ..
+  cp $filename-contigs.fa ..
 
 	#Move to bowtie directory
   cp ../$filename-contigs.fa $BASE_DIR/Metaxas_Output/$filename/bowtie
