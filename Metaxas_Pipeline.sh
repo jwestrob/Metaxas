@@ -134,7 +134,7 @@ do
   #cd to idba directory; begin assembly
   cd $BASE_DIR/Metaxas_Output/$filename/idba
   #Reduce number of iterations for debugging purposes only; REVERT ONCE DONE
-  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 30 --min_contig 500 -r $filename_wpath --num_threads $THREADS
+  /home/jaw293/idba/bin/idba_ud --mink 40 --maxk 100 --step 15 --min_contig 500 -r $filename_wpath --num_threads $THREADS
   mv out/contig.fa .
   mv contig.fa $filename-contigs.fa
 
@@ -155,7 +155,7 @@ do
   bowtie2-build $filename-contigs.fa $filename-idx --threads $THREADS
 
   #Align reads to contigs
-  bowtie2 -x $filename-idx -r $filename_wpath --threads $THREADS -S $filename-sam.sam --al $filename-aligned-reads.fa --un $filename-unaligned-reads.fa
+  bowtie2 -x $filename-idx -r $filename_wpath --threads $THREADS -S $filename-sam.sam --al $filename-aligned-reads.fa --un $filename-unaligned-reads.fa --quiet
 
   #Convert to bam
   samtools view -F 4 -@ $THREADS -bS $filename-sam.sam > $filename-alignment-RAW.bam
@@ -188,7 +188,7 @@ do
 
   ####### Make special directory for fastas
   mkdir MyCC_4mer/Bins
-  cp MyCC_4mer/6_ClusterCtg/*.fa MyCC_4mer/Bins
+  cp MyCC_4mer/6_ClusterCtg_Alias/*.fasta MyCC_4mer/Bins
 
   ####### 		MyCC- 5/6-mer
   MyCC.py $filename-contigs.fa 56mer -a bowtie/$filename-alignment.bam -t 1000
@@ -196,7 +196,7 @@ do
 
   ####### Make special directory for fastas
   mkdir MyCC_56mer/Bins
-  cp MyCC_56mer/6_ClusterCtg/*.fa MyCC_56mer/Bins
+  cp MyCC_56mer/6_ClusterCtg_Alias/*.fasta MyCC_56mer/Bins
 
   #######		MaxBin		#######
   mkdir $BASE_DIR/Metaxas_Output/$filename/MaxBin
@@ -205,18 +205,19 @@ do
   ####### Move non-FASTA files to subdirectory because DASTool doesn't like them
   mkdir MaxBin/nonfasta
   mv MaxBin/* MaxBin/nonfasta
-  mv MaxBin/nonfasta/*.fasta MaxBin/
+  mkdir MaxBin/fasta
+  mv MaxBin/nonfasta/*.fasta MaxBin/fasta
   
   #######		DAS-Tool	#######
   SCAF="/mnt/scratch/JACOBS_SOFTWARE/scaffolds2bin.py"
-  python $SCAF -bd metabat -o metabat
-  python $SCAF -bd MyCC_4mer/Bins -o MyCC_4mer
-  python $SCAF -bd MyCC_56mer/Bins -o MyCC_56mer
-  python $SCAF -bd MaxBin/ -o MaxBin
+  $SCAF -bd metabat/ -o metabat
+  $SCAF -bd MyCC_4mer/Bins/ -o MyCC_4mer
+  $SCAF -bd MyCC_56mer/Bins/ -o MyCC_56mer
+  $SCAF -bd MaxBin/fasta/ -o MaxBin
 
   mkdir DAS
   /mnt/scratch/JACOBS_SOFTWARE/DAS_Tool/DAS_Tool -i metabat.scaffolds2bin.tsv,MyCC_4mer.scaffolds2bin.tsv,MyCC_56mer.scaffolds2bin.tsv,MaxBin.scaffolds2bin.tsv \
-							-c $filename-contigs.fa -l metabat,MyCC_4mer,MyCC_56mer,MaxBin -t $THREADS -o DAS/DasToolRun1 --proteins DAS/Run1_proteins.faa
+							-c $filename-contigs.fa -l metabat,MyCC_4mer,MyCC_56mer,MaxBin -t $THREADS -o DAS/DasToolRun1
 
   
   cd $BASE_DIR
